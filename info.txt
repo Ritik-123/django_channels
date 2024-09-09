@@ -1,0 +1,113 @@
+. install dependency : 
+    pip install channels==3.0.4 (other version get error not found)
+ 
+. mention 'channels' in installed apps in the top.
+
+. Modify asgi.py file.
+
+* Protocol Type Router:
+    
+    . Protocol Type Router lets you dispatch to one of a number of other ASGI applications based on the type value 
+        present in the scope.
+    
+    . Protocols define a fixed type value that their scope contains, so you can use this to distinguish between incoming 
+        connection types.
+    
+    . Protocol Type Router should be the top level of your asgi application stack and the main entry in your routing file.
+
+    . It takes a single argument - a dictionary mapping types names to asgi applications that serve them.
+        Protocol Type Router({
+            'http': some_app,
+            'websoket': some_other_app
+        })
+
+* Consumers:
+    
+    . A Consumer is a basic unit of channels code. Consumers are like django views.
+    
+    . Consumer can do following things in particular:
+        
+        . Structure your code as a series of functions to be called whenever an event happens, rather then making you 
+            write event loop.
+        
+        .Allow you to write sync and async code and deals with handoffs and threading for you.
+
+    . Creating Consumers:
+        . SyncConsumer.
+        . AsyncConsumer.
+
+Routing Classes:
+
+    . channels provides routing Classes that allow you to combine and stack your consumers (And any other asgi application) 
+        to dispatch based on what the connection is.
+    
+    . We call the as_asgi() classmethod when routing our consumers.
+
+    . This returns a ASGI wrapper application that will instantiate a new consumer instance for each connection or scope.
+
+    . This is similar to django's as_view(), which plays the same role for per-request instances of class-based views.
+
+    . Create routing.py File then write all websocket url patterns inside this file.
+
+    . Open asgi.py file and mentioned your routing.py file.
+
+# Creating Consuers:
+
+    . class MysyncConsumer(SyncConsumer):
+        
+        def websocket_connect(self, event):
+            self.send({
+                'type': 'websocket.accept'
+            })
+
+        def websocket_receive(self, event):
+            print(event['text])
+            self.send({
+                'type': 'websocket.send',
+                'text': 'Message from server'
+            })
+
+        def websocket_disconnect(self, event):
+            raise StopConsumer()
+
+    . class MyAsyncConsumer(AsyncConsumer):
+        
+        async def websocket_connect(self, event):
+            await self.send({
+                'type': 'websocket.accept'
+            })
+
+        async def websocket_receive(self, event):
+            print(event['text])
+            await self.send({
+                'type': 'websocket.send',
+                'text': 'Message from server'
+            })
+
+        async def websocket_disconnect(self, event):
+            raise StopConsumer()
+
+. Django channels layers.
+
+    . Install redis in local machine.
+    . pip install channles-redis
+    . mention in django settings.py file.
+    . Used to interact multiple consumer objects with each other.
+
+. inside receive function:
+    
+    . we can get user information : self.scope['user'] // similar in api we get all information in request keyword.
+
+. Authentication :
+    
+    . We use AuthMiddlewareStack.
+    . Inside receive function we can make conditions like: self.scope['user'].is_authenticated
+
+. Database.
+
+    . Django ORM is synchronous : 
+        . If we use asynchronous consumer then we use database_sync_to_async.
+            . For example: group= await database_sync_to_async(Group.objects.get)(name= self.groupName)
+
+        . In synchronous consumer it will work fine.
+

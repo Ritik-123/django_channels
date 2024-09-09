@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <!-- <h1>count</h1>
+    <h2>id= "ct"</h2> -->
+    
+    <textarea name="chat-log", cols="100", rows="20"></textarea><br>
+    <input type="", id="chat-message-input", size="100"><br>
+    <input type="button", value="send" id="chat-message-submit">
+
+    <script>
+        var ws= new WebSocket('/ws/sc/')
+
+        ws.onopen= function() {
+            console.log('websocket connection open...')
+            ws.send('Message from client')
+        }
+
+        ws.onmessage= function(event) {
+            console.log('Message received from server...', event.data)
+            document.getElementById("ct").innerText= event.data
+        }
+        
+        ws.onerror= function(event) {
+            console.log('Websocket Error occured...', event)
+        }
+
+        ws.onclose= function(event) {
+            console.log('websocket connection closed...', event)
+        }
+
+        document.getElementById("chat-message-submit").onclick= function(event){
+            const messageInputDom= document.getElementById('chat-message-input')
+            const message= messageInputDom.value
+            ws.send(JSON.stringify({
+                'msg': message
+            }))
+            messageInputDom.value= ''
+        }
+
+        // Using event listener.
+        // ws.addEventListener('open', () => {
+        //     console.log('websocket connection open...')
+        //     ws.send('Message from client')
+        // })
+
+        // ws.addEventListener('message', (event) => {
+        //     console.log('Message received from server...', event)
+        // })
+
+        // ws.addEventListener('error', (event) => {
+        //     console.log('Websocket Error occured...', event)
+        // })
+
+        // ws.addEventListener('close', (event) => {
+        //     console.log('websocket connection closed...', event)
+        // })
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+<!-- chat/templates/chat/index.html -->
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Rooms</title>
+</head>
+<body>
+    What chat room would you like to enter?<br>
+    <input id="room-name-input" type="text" size="100"><br>
+    <input id="room-name-submit" type="button" value="Enter">
+
+    <script>
+        document.querySelector('#room-name-input').focus();
+        document.querySelector('#room-name-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {  // enter, return
+                document.querySelector('#room-name-submit').click();
+            }
+        };
+
+        document.querySelector('#room-name-submit').onclick = function(e) {
+            var roomName = document.querySelector('#room-name-input').value;
+            window.location.pathname = '/chat/' + roomName + '/';
+        };
+    </script>
+</body>
+</html> -->
